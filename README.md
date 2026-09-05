@@ -1,58 +1,153 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel + Vue Bookstore Demo
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Небольшое SPA-приложение книжного каталога на **Laravel + Vue 3**. Проект сделан как практическая демонстрация работы со стеком: REST API, Eloquent, валидация, авторизация, JWT, Policies, feature-тесты и Vue SPA.
 
-## About Laravel
+> Это демонстрационный проект, а не коммерческий продукт. Его задача — показать практическую работу с Laravel и Vue и основные решения, которые я использую при разработке backend/API.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Что реализовано
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- каталог книг с поиском, фильтрами, сортировкой и пагинацией;
+- синхронизация фильтров каталога с query string;
+- страница книги и блок похожих книг;
+- корзина с хранением состояния в `localStorage`;
+- JWT-аутентификация: login, logout, получение текущего пользователя;
+- создание книг авторизованным пользователем;
+- редактирование и удаление только собственных книг;
+- серверная валидация через Laravel Form Requests;
+- преобразование API-ответов через Laravel API Resources;
+- разграничение доступа через Laravel Policies;
+- factories и seeders для демонстрационных данных;
+- feature-тесты API, аутентификации, прав доступа и валидации.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Стек
 
-## Learning Laravel
+### Backend
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP 8.3+
+- Laravel 13
+- Eloquent ORM
+- SQLite для локального запуска
+- REST API
+- JWT Auth (`php-open-source-saver/jwt-auth`)
+- PHPUnit / Laravel Feature Tests
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Frontend
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- Vue 3
+- Composition API
+- Vue Router
+- Axios
+- Tailwind CSS
+- Vite
 
-## Agentic Development
+## Структура backend
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Основной поток обработки данных построен стандартными механизмами Laravel:
 
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```text
+Route
+  -> Controller
+    -> FormRequest
+      -> Eloquent Model
+        -> API Resource
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Права на изменение и удаление книг проверяются через `BookPolicy`.
 
-## Contributing
+## Быстрый запуск
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Требования:
 
-## Code of Conduct
+- PHP 8.3+
+- Composer
+- Node.js + npm
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+git clone https://github.com/SoslanGit/spa.git
+cd spa
+composer setup
+```
 
-## Security Vulnerabilities
+Команда `composer setup`:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. устанавливает PHP-зависимости;
+2. создаёт `.env` из `.env.example`;
+3. генерирует `APP_KEY` и `JWT_SECRET`;
+4. создаёт локальную SQLite-базу;
+5. запускает миграции и seeders;
+6. устанавливает frontend-зависимости;
+7. собирает frontend.
 
-## License
+Для разработки можно запустить Laravel и Vite отдельно:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan serve
+npm run dev
+```
+
+Приложение Laravel по умолчанию будет доступно на `http://127.0.0.1:8000`.
+
+## Демо-пользователь
+
+После `php artisan migrate --seed` создаётся пользователь:
+
+```text
+Email: demo@bookstore.test
+Password: password
+```
+
+От его имени можно создавать, редактировать и удалять собственные книги.
+
+## API
+
+| Method | Endpoint | Auth | Назначение |
+|---|---|---|---|
+| `POST` | `/api/login` | Нет | Получить JWT |
+| `GET` | `/api/books` | Нет | Получить каталог |
+| `GET` | `/api/me` | JWT | Текущий пользователь |
+| `POST` | `/api/logout` | JWT | Завершить сессию / инвалидировать токен |
+| `POST` | `/api/books` | JWT | Создать книгу |
+| `PATCH` | `/api/books/{book}` | JWT + owner | Изменить свою книгу |
+| `DELETE` | `/api/books/{book}` | JWT + owner | Удалить свою книгу |
+
+Пример создания книги:
+
+```json
+{
+  "title": "Designing Data-Intensive Applications",
+  "author": "Martin Kleppmann",
+  "genre": "engineering",
+  "year": 2017,
+  "pages": 616,
+  "price": 2490,
+  "description": "Demo book"
+}
+```
+
+## Тесты
+
+```bash
+composer test
+```
+
+Feature-тестами проверяются, в частности:
+
+- успешная и неуспешная JWT-аутентификация;
+- доступ к `/api/me`;
+- logout и инвалидирование токена;
+- запрет создания книги для гостя;
+- создание книги авторизованным пользователем;
+- валидация входных данных;
+- редактирование собственной книги;
+- запрет редактирования и удаления чужой книги;
+- удаление собственной книги.
+
+## Осознанные упрощения демо-проекта
+
+Каталог небольшой, поэтому поиск, фильтрация, сортировка и пагинация сейчас выполняются на клиенте. Для большого production-каталога эти операции логичнее перенести на backend и использовать серверную пагинацию Laravel.
+
+JWT хранится в `localStorage`, чтобы в рамках проекта продемонстрировать token-based API authentication. Для same-origin production SPA я также рассматривал бы Laravel Sanctum с cookie-based аутентификацией и `HttpOnly` cookies в зависимости от требований проекта.
+
+## Автор
+
+Проект разработан как практическая демонстрация Laravel + Vue при переходе от коммерческой PHP/backend-разработки к Laravel-стеку.

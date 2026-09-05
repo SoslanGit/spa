@@ -2,6 +2,7 @@
 import { onMounted } from 'vue'
 import AuthBar from './components/AuthBar.vue'
 import BookCreateModal from './components/BookCreateModal.vue'
+import BookEditModal from './components/BookEditModal.vue'
 import { useAuth } from './composables/useAuth'
 import { useBooks } from './composables/useBooks'
 import { useCart } from './composables/useCart'
@@ -59,6 +60,7 @@ onMounted(() => {
             </div>
         </nav>
         <BookCreateModal />
+        <BookEditModal />
         <main class="mx-auto max-w-6xl p-6">
             <router-view />
         </main>

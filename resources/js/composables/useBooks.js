@@ -41,6 +41,12 @@ export function useBooks() {
         return data
     }
 
+    async function update(id, payload) {
+        const { data } = await api.patch(`/api/books/${id}`, payload)
+        catalog.value = catalog.value.map((book) => (book.id === id ? data : book))
+        return data
+    }
+
     async function remove(id) {
         await api.delete(`/api/books/${id}`)
         catalog.value = catalog.value.filter((book) => book.id !== id)
@@ -56,5 +62,5 @@ export function useBooks() {
         return catalog.value.filter((item) => item.genre === book.genre && item.id !== book.id).slice(0, limit)
     }
 
-    return { catalog, loading, error, load, create, remove, getById, relatedOf }
+    return { catalog, loading, error, load, create, update, remove, getById, relatedOf }
 }

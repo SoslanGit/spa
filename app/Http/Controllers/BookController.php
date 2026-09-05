@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreBookRequest;
+use App\Http\Requests\UpdateBookRequest;
 use App\Http\Resources\BookResource;
 use App\Models\Book;
 use Illuminate\Http\JsonResponse;
@@ -28,6 +29,13 @@ class BookController extends Controller
         return (new BookResource($book))
             ->response()
             ->setStatusCode(201);
+    }
+
+    public function update(UpdateBookRequest $request, Book $book): BookResource
+    {
+        $book->update($request->validated());
+
+        return new BookResource($book->refresh());
     }
 
     public function destroy(Book $book): Response

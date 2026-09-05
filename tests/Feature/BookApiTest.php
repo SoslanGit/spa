@@ -32,6 +32,80 @@ class BookApiTest extends TestCase
         ]);
     }
 
+    public function test_book_creation_requires_valid_payload(): void
+    {
+        $user = User::factory()->create();
+
+        $this->postJson('/api/books', [
+            'author' => 'Unknown',
+            'genre' => 'not-a-genre',
+            'year' => 1800,
+            'price' => -1,
+        ], $this->bearer($user))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['title', 'genre', 'year', 'price']);
+    }
+
+    public function test_guest_cannot_update_book(): void
+    {
+        $owner = User::factory()->create();
+        $book = Book::factory()->for($owner)->create();
+
+        $this->patchJson("/api/books/{$book->id}", ['title' => 'Updated'])
+            ->assertUnauthorized();
+    }
+
+    public function test_user_cannot_update_someone_elses_book(): void
+    {
+        $owner = User::factory()->create();
+        $stranger = User::factory()->create();
+        $book = Book::factory()->for($owner)->create(['title' => 'Original']);
+
+        $this->patchJson("/api/books/{$book->id}", ['title' => 'Changed'], $this->bearer($stranger))
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('books', [
+            'id' => $book->id,
+            'title' => 'Original',
+        ]);
+    }
+
+    public function test_owner_can_update_book(): void
+    {
+        $owner = User::factory()->create();
+        $book = Book::factory()->for($owner)->create([
+            'title' => 'Original',
+            'price' => 1000,
+        ]);
+
+        $this->patchJson("/api/books/{$book->id}", [
+            'title' => 'Updated title',
+            'price' => 1490,
+        ], $this->bearer($owner))
+            ->assertOk()
+            ->assertJsonPath('title', 'Updated title')
+            ->assertJsonPath('price', 1490);
+
+        $this->assertDatabaseHas('books', [
+            'id' => $book->id,
+            'title' => 'Updated title',
+            'price' => 1490,
+        ]);
+    }
+
+    public function test_book_update_validates_changed_fields(): void
+    {
+        $owner = User::factory()->create();
+        $book = Book::factory()->for($owner)->create();
+
+        $this->patchJson("/api/books/{$book->id}", [
+            'genre' => 'unknown',
+            'year' => 1800,
+        ], $this->bearer($owner))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['genre', 'year']);
+    }
+
     public function test_user_cannot_delete_someone_elses_book(): void
     {
         $owner = User::factory()->create();

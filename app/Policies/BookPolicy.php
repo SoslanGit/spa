@@ -12,6 +12,11 @@ class BookPolicy
         return true;
     }
 
+    public function update(User $user, Book $book): bool
+    {
+        return (int) $book->user_id === (int) $user->id;
+    }
+
     public function delete(User $user, Book $book): bool
     {
         return (int) $book->user_id === (int) $user->id;

@@ -3,6 +3,7 @@ import { computed, onUnmounted, ref } from 'vue'
 import BookCover from './BookCover.vue'
 import { useAuth } from '../composables/useAuth'
 import { useBooks } from '../composables/useBooks'
+import { useEditBookModal } from '../composables/useEditBookModal'
 import { useCart } from '../composables/useCart'
 import { genreLabel } from '../data/books'
 import { discountPercent, formatPrice, formatReviews } from '../utils/format'
@@ -15,6 +16,7 @@ const props = defineProps({
 const { add, qtyOf } = useCart()
 const { isAuthenticated, user } = useAuth()
 const { remove } = useBooks()
+const { show: showEdit } = useEditBookModal()
 const qty = qtyOf(props.book.id)
 const addedFlash = ref(false)
 const removing = ref(false)
@@ -23,7 +25,7 @@ let flashTimer
 
 onUnmounted(() => clearTimeout(flashTimer))
 
-const canDelete = computed(
+const canManage = computed(
     () => isAuthenticated.value && Number(props.book.userId) === Number(user.value?.id),
 )
 
@@ -114,9 +116,17 @@ async function onDelete() {
                         {{ formatPrice(book.oldPrice) }}
                     </p>
                 </div>
-                <div class="flex shrink-0 items-center gap-2">
+                <div class="flex flex-wrap items-center justify-end gap-2">
                     <button
-                        v-if="canDelete"
+                        v-if="canManage"
+                        type="button"
+                        class="rounded-lg border border-sky-500/30 px-3 py-1.5 text-sm font-medium text-sky-300 transition hover:border-sky-400 hover:bg-sky-500/10"
+                        @click.stop="showEdit(book)"
+                    >
+                        Изменить
+                    </button>
+                    <button
+                        v-if="canManage"
                         type="button"
                         class="rounded-lg border border-rose-500/30 px-3 py-1.5 text-sm font-medium text-rose-300 transition hover:border-rose-400 hover:bg-rose-500/10 disabled:opacity-40"
                         :disabled="removing"
