@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Observers\BookObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 
 #[Fillable([
     'title',
@@ -23,6 +25,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'description',
     'cover',
 ])]
+#[ObservedBy([BookObserver::class])]
+
 class Book extends Model
 {
     use HasFactory;

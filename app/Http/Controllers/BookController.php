@@ -9,13 +9,15 @@ use App\Models\Book;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
+use App\Services\BookCatalogCache;
 
 class BookController extends Controller
 {
-    public function index(): AnonymousResourceCollection
+    public function index(BookCatalogCache $cache): AnonymousResourceCollection
     {
         return BookResource::collection(
-            Book::query()->orderBy('id')->get(),
+            $cache->getAll()
         );
     }
 
